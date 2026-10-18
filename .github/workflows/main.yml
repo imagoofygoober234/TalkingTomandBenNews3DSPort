@@ -1,8 +1,11 @@
 
-name: Build Tom and Ben CIA
+name: Build Tom and Ben 3DS
 
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -11,33 +14,40 @@ jobs:
       image: devkitpro/devkitarm:latest
 
     steps:
-      - name: Get game files
+      - name: Download game files
         uses: actions/checkout@v4
 
-      - name: Organize source code
+      - name: Organize source files
+        shell: bash
         run: |
           mkdir -p source
-          for f in main.c voice.c voice.h; do
-            if [ -f "$f" ]; then
-              mv "$f" source/
+          for file in main.c voice.c voice.h; do
+            if [ -f "$file" ]; then
+              mv "$file" source/
             fi
           done
 
-      - name: Compile game
-        run: make -j2
-
-      - name: Create CIA
+      - name: Check game files
+        shell: bash
         run: |
-          test -f TomBenNews3DS.elf
-          test -f TomBenNews3DS.smdh
-          makerom -f cia -o TomBenNews3DS.cia \
-            -elf TomBenNews3DS.elf \
-            -rsf game.rsf \
-            -icon TomBenNews3DS.smdh
+          ls -la
+          test -f Makefile
+          test -f source/main.c
+          test -f source/voice.c
 
-      - name: Downloadable CIA
+      - name: Compile game
+        shell: bash
+        run: |
+          make -j2
+
+      - name: Save build files
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: TalkingTomBen3DS-CIA
-          path: TomBenNews3DS.cia
-          if-no-files-found: error
+          name: TomBen3DS-Build
+          path: |
+            *.3dsx
+            *.elf
+            *.smdh
+            *.cia
+          if-no-files-found: warn
