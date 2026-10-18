@@ -33,7 +33,7 @@ static bool load_jpg(const char *file,u8 *buffer,int w,int h){
  while(c.output_scanline<(unsigned)h){JSAMPROW row=buffer+c.output_scanline*w*3;jpeg_read_scanlines(&c,&row,1);}
  jpeg_finish_decompress(&c);jpeg_destroy_decompress(&c);fclose(f);return true;
 }
-static void blit(GFX_SCREEN screen,u8 *data,int w,int h){
+static void blit(gfxScreen_t screen,u8 *data,int w,int h){
  u16 fw,fh;u8 *dst=gfxGetFramebuffer(screen,GFX_LEFT,&fw,&fh);
  for(int y=0;y<h;y++)for(int x=0;x<w;x++){
   u8 *p=data+(y*w+x)*3,*q=dst+(x*h+(h-1-y))*3;
