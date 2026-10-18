@@ -18,13 +18,13 @@ static bool start_capture(int character) {
  memset(micMemory, 0, CAPACITY);
  recordedBytes=0;
  // One-shot capture; avoid overwriting while user holds the button.
- if (R_FAILED(micStartSampling(MICU_ENCODING_PCM16, MICU_SAMPLE_RATE_16360, 0, CAPACITY, false))) return false;
+ if (R_FAILED(MICU_StartSampling(MICU_ENCODING_PCM16, MICU_SAMPLE_RATE_16360, 0, CAPACITY, false))) return false;
  recording=true; who=character; return true;
 }
 static void stop_capture(void) {
  if (!recording) return;
  u32 end=micGetLastSampleOffset();
- micStopSampling(); recording=false;
+ MICU_StartSampling(); recording=false;
  // Buffer offset returned in bytes. 16-bit audio needs an even size.
  if(end>CAPACITY)end=CAPACITY;
  recordedBytes=end&~1u;
@@ -62,4 +62,4 @@ void voiceUpdate(u32 down,u32 held){
  }
 }
 const char *voiceStatus(void){return recording?(who==VOICE_BEN?"Recording Ben":"Recording Tom"):(playing?"Repeating voice":"Ready");}
-void voiceExit(void){if(recording)micStopSampling();if(micReady)micExit();if(dspReady){ndspChnWaveBufClear(0);ndspExit();}if(micMemory)free(micMemory);if(playMemory)linearFree(playMemory);}
+void voiceExit(void){if(recording)MICU_StopSampling();if(micReady)micExit();if(dspReady){ndspChnWaveBufClear(0);ndspExit();}if(micMemory)free(micMemory);if(playMemory)linearFree(playMemory);}
