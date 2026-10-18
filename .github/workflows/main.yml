@@ -1,0 +1,43 @@
+
+name: Build Tom and Ben CIA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitarm:latest
+
+    steps:
+      - name: Get game files
+        uses: actions/checkout@v4
+
+      - name: Organize source code
+        run: |
+          mkdir -p source
+          for f in main.c voice.c voice.h; do
+            if [ -f "$f" ]; then
+              mv "$f" source/
+            fi
+          done
+
+      - name: Compile game
+        run: make -j2
+
+      - name: Create CIA
+        run: |
+          test -f TomBenNews3DS.elf
+          test -f TomBenNews3DS.smdh
+          makerom -f cia -o TomBenNews3DS.cia \
+            -elf TomBenNews3DS.elf \
+            -rsf game.rsf \
+            -icon TomBenNews3DS.smdh
+
+      - name: Downloadable CIA
+        uses: actions/upload-artifact@v4
+        with:
+          name: TalkingTomBen3DS-CIA
+          path: TomBenNews3DS.cia
+          if-no-files-found: error
